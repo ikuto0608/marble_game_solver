@@ -1,4 +1,6 @@
 require 'time'
+require "json"
+require 'redis'
 
 EMPTY = 0
 FILLED = 1
@@ -31,10 +33,18 @@ def initialize_field
 end
 
 def play_game
+  redis = Redis.new
   keys = @current_field.select{|key, value| value == FILLED }
                        .keys
 
   keys.each do |key|
+    board_history = []
+    row_board_history = redis.get(@current_field.values.join.to_s)
+    unless row_board_history.nil?
+      board_history = JSON.parse(row_board_history)
+    end
+
+    break if board_history.include?(key)
     break if complete_game?
 
     field_array = @current_field.dup
@@ -71,6 +81,9 @@ def play_game
       jump_up([key[0], key[1]])
       play_game
     end
+
+    board_history << key
+    redis.set(@current_field.values.join.to_s, board_history.to_json)
   end
 end
 
