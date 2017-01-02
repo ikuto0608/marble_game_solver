@@ -18,16 +18,16 @@ NON_FIELD_ARRAY = [
 @completed = false
 
 def initialize_field
-  6.downto(0) do |y_index|
-    7.times do |x_index|
-      unless NON_FIELD_ARRAY.include?([x_index - 3, y_index - 3])
-        unless CENTER == [x_index - 3, y_index - 3]
-          @current_field_hash[[x_index - 3, y_index - 3]] = FILLED
+  6.downto(0) do |y|
+    7.times do |x|
+      unless NON_FIELD_ARRAY.include?([x - 3, y - 3])
+        unless CENTER == [x - 3, y - 3]
+          @current_field_hash[[x - 3, y - 3]] = FILLED
         else
-          @current_field_hash[[x_index - 3, y_index - 3]] = EMPTY
+          @current_field_hash[[x - 3, y - 3]] = EMPTY
         end
       else
-        @current_field_hash[[x_index - 3, y_index - 3]] = NON_FIELD
+        @current_field_hash[[x - 3, y - 3]] = NON_FIELD
       end
     end
   end
@@ -102,7 +102,7 @@ def jump_right(coordinate)
   @current_field_hash[[coordinate[0] + 1, coordinate[1]]] = EMPTY
   @current_field_hash[[coordinate[0] + 2, coordinate[1]]] = FILLED
 
-  @record.push("Jump RIGHT at (#{coordinate[0]}, #{coordinate[1]})!")
+  @record.push("Jump RIGHT at (#{coordinate[0]}, #{coordinate[1]}).")
 end
 
 def jump_left(coordinate)
@@ -110,7 +110,7 @@ def jump_left(coordinate)
   @current_field_hash[[coordinate[0] - 1, coordinate[1]]] = EMPTY
   @current_field_hash[[coordinate[0] - 2, coordinate[1]]] = FILLED
 
-  @record.push("Jump LEFT at (#{coordinate[0]}, #{coordinate[1]})!")
+  @record.push("Jump LEFT at (#{coordinate[0]}, #{coordinate[1]}).")
 end
 
 def jump_up(coordinate)
@@ -118,7 +118,7 @@ def jump_up(coordinate)
   @current_field_hash[[coordinate[0], coordinate[1] + 1]] = EMPTY
   @current_field_hash[[coordinate[0], coordinate[1] + 2]] = FILLED
 
-  @record.push("Jump UP at (#{coordinate[0]}, #{coordinate[1]})!")
+  @record.push("Jump UP at (#{coordinate[0]}, #{coordinate[1]}).")
 end
 
 def jump_down(coordinate)
@@ -126,7 +126,7 @@ def jump_down(coordinate)
   @current_field_hash[[coordinate[0], coordinate[1] - 1]] = EMPTY
   @current_field_hash[[coordinate[0], coordinate[1] - 2]] = FILLED
 
-  @record.push("Jump DOWN at (#{coordinate[0]}, #{coordinate[1]})!")
+  @record.push("Jump DOWN at (#{coordinate[0]}, #{coordinate[1]}).")
 end
 
 def can_jump_right?(coordinate)
