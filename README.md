@@ -1,4 +1,4 @@
-# Marble solitaire game solver
+# Marble solitaire (Peg solitaire) game solver
 
 ### What's marble solitaire?
 #### Remove center marble to start game.
