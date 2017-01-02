@@ -13,7 +13,7 @@ NON_FIELD_ARRAY = [
                     [2, 2], [3, 2], [2, 3], [3, 3]
                   ]
 
-@current_field = {}
+@current_field_hash = {}
 @record = []
 
 def initialize_field
@@ -21,12 +21,12 @@ def initialize_field
     7.times do |x_index|
       unless NON_FIELD_ARRAY.include?([x_index - 3, y_index - 3])
         unless CENTER == [x_index - 3, y_index - 3]
-          @current_field[[x_index - 3, y_index - 3]] = FILLED
+          @current_field_hash[[x_index - 3, y_index - 3]] = FILLED
         else
-          @current_field[[x_index - 3, y_index - 3]] = EMPTY
+          @current_field_hash[[x_index - 3, y_index - 3]] = EMPTY
         end
       else
-        @current_field[[x_index - 3, y_index - 3]] = NON_FIELD
+        @current_field_hash[[x_index - 3, y_index - 3]] = NON_FIELD
       end
     end
   end
@@ -34,31 +34,32 @@ end
 
 def play_game
   redis = Redis.new
-  keys = @current_field.select{|key, value| value == FILLED }
+  keys = @current_field_hash.select{|key, value| value == FILLED }
                        .keys
 
   keys.each do |key|
     board_history = []
     inverse_field_hash = inverse_field
     board_history_key = [
-                          @current_field.values.join.to_i,
-                          rotation_field(90, @current_field).values.join.to_i,
-                          rotation_field(180, @current_field).values.join.to_i,
-                          rotation_field(270, @current_field).values.join.to_i,
+                          @current_field_hash.values.join.to_i,
+                          rotation_field(90, @current_field_hash).values.join.to_i,
+                          rotation_field(180, @current_field_hash).values.join.to_i,
+                          rotation_field(270, @current_field_hash).values.join.to_i,
                           inverse_field_hash.values.join.to_i,
                           rotation_field(90, inverse_field_hash).values.join.to_i,
                           rotation_field(180, inverse_field_hash).values.join.to_i,
                           rotation_field(270, inverse_field_hash).values.join.to_i,
                         ].min
-    row_board_history = redis.get(board_history_key)
-    unless row_board_history.nil?
-      board_history = JSON.parse(row_board_history)
+
+    board_history = redis.get(board_history_key) || []
+    if !board_history.empty?
+      board_history = JSON.parse(board_history)
     end
 
     next if board_history.include?(key)
     break if complete_game?
 
-    field_array = @current_field.dup
+    field_hash = @current_field_hash.dup
     record = @record.dup
 
     if can_jump_right?([key[0], key[1]])
@@ -67,7 +68,7 @@ def play_game
     end
 
     break if complete_game?
-    @current_field = field_array.dup
+    @current_field_hash = field_hash.dup
     @record = record.dup
 
     if can_jump_down?([key[0], key[1]])
@@ -76,7 +77,7 @@ def play_game
     end
 
     break if complete_game?
-    @current_field = field_array.dup
+    @current_field_hash = field_hash.dup
     @record = record.dup
 
     if can_jump_left?([key[0], key[1]])
@@ -85,7 +86,7 @@ def play_game
     end
 
     break if complete_game?
-    @current_field = field_array.dup
+    @current_field_hash = field_hash.dup
     @record = record.dup
 
     if can_jump_up?([key[0], key[1]])
@@ -99,37 +100,37 @@ def play_game
 end
 
 def complete_game?
-  return @current_field.values.count(FILLED) == 1
+  return @current_field_hash.values.count(FILLED) == 1
 end
 
 def jump_right(spot)
-  @current_field[[spot[0], spot[1]]] = EMPTY
-  @current_field[[spot[0] + 1, spot[1]]] = EMPTY
-  @current_field[[spot[0] + 2, spot[1]]] = FILLED
+  @current_field_hash[[spot[0], spot[1]]] = EMPTY
+  @current_field_hash[[spot[0] + 1, spot[1]]] = EMPTY
+  @current_field_hash[[spot[0] + 2, spot[1]]] = FILLED
 
   @record.push("[#{spot[0]}, #{spot[1]}] jump Right!")
 end
 
 def jump_left(spot)
-  @current_field[[spot[0], spot[1]]] = EMPTY
-  @current_field[[spot[0] - 1, spot[1]]] = EMPTY
-  @current_field[[spot[0] - 2, spot[1]]] = FILLED
+  @current_field_hash[[spot[0], spot[1]]] = EMPTY
+  @current_field_hash[[spot[0] - 1, spot[1]]] = EMPTY
+  @current_field_hash[[spot[0] - 2, spot[1]]] = FILLED
 
   @record.push("[#{spot[0]}, #{spot[1]}] jump Left!")
 end
 
 def jump_up(spot)
-  @current_field[[spot[0], spot[1]]] = EMPTY
-  @current_field[[spot[0], spot[1] + 1]] = EMPTY
-  @current_field[[spot[0], spot[1] + 2]] = FILLED
+  @current_field_hash[[spot[0], spot[1]]] = EMPTY
+  @current_field_hash[[spot[0], spot[1] + 1]] = EMPTY
+  @current_field_hash[[spot[0], spot[1] + 2]] = FILLED
 
   @record.push("[#{spot[0]}, #{spot[1]}] jump Up!")
 end
 
 def jump_down(spot)
-  @current_field[[spot[0], spot[1]]] = EMPTY
-  @current_field[[spot[0], spot[1] - 1]] = EMPTY
-  @current_field[[spot[0], spot[1] - 2]] = FILLED
+  @current_field_hash[[spot[0], spot[1]]] = EMPTY
+  @current_field_hash[[spot[0], spot[1] - 1]] = EMPTY
+  @current_field_hash[[spot[0], spot[1] - 2]] = FILLED
 
   @record.push("[#{spot[0]}, #{spot[1]}] jump Down!")
 end
@@ -183,11 +184,11 @@ def can_jump_down?(spot)
 end
 
 def filled_place?(spot)
-  return !@current_field[[spot[0], spot[1]]].nil? && @current_field[[spot[0], spot[1]]] == FILLED
+  return !@current_field_hash[[spot[0], spot[1]]].nil? && @current_field_hash[[spot[0], spot[1]]] == FILLED
 end
 
 def empty_place?(spot)
-  return !@current_field[[spot[0], spot[1]]].nil? && @current_field[[spot[0], spot[1]]] == EMPTY
+  return !@current_field_hash[[spot[0], spot[1]]].nil? && @current_field_hash[[spot[0], spot[1]]] == EMPTY
 end
 
 def rotation_field(degrees, field)
@@ -204,9 +205,9 @@ def rotation_field(degrees, field)
 end
 
 def inverse_field
-  inverse_values = @current_field.values.reverse
+  inverse_values = @current_field_hash.values.reverse
   index = 0
-  @current_field.keys.inject({}) do |h, value|
+  @current_field_hash.keys.inject({}) do |h, value|
     h[value] = inverse_values[index]
     index += 1
     h
