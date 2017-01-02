@@ -15,6 +15,7 @@ NON_FIELD_ARRAY = [
 
 @current_field_hash = {}
 @record = []
+@completed = false
 
 def initialize_field
   6.downto(0) do |y_index|
@@ -38,19 +39,7 @@ def play_game
                        .keys
 
   keys.each do |key|
-    board_history = []
-    inverse_field_hash = inverse_field
-    board_history_key = [
-                          @current_field_hash.values.join.to_i,
-                          rotation_field(90, @current_field_hash).values.join.to_i,
-                          rotation_field(180, @current_field_hash).values.join.to_i,
-                          rotation_field(270, @current_field_hash).values.join.to_i,
-                          inverse_field_hash.values.join.to_i,
-                          rotation_field(90, inverse_field_hash).values.join.to_i,
-                          rotation_field(180, inverse_field_hash).values.join.to_i,
-                          rotation_field(270, inverse_field_hash).values.join.to_i,
-                        ].min
-
+    board_history_key = summarize_board_history_key
     board_history = redis.get(board_history_key) || []
     if !board_history.empty?
       board_history = JSON.parse(board_history)
@@ -100,7 +89,14 @@ def play_game
 end
 
 def complete_game?
-  return @current_field_hash.values.count(FILLED) == 1
+  return true if @completed
+
+  if @current_field_hash.values.count(FILLED) == 1
+    @completed = true
+    return true
+  else
+    return false
+  end
 end
 
 def jump_right(spot)
@@ -212,6 +208,20 @@ def inverse_field
     index += 1
     h
   end
+end
+
+def summarize_board_history_key
+  inverse_field_hash = inverse_field
+  [
+    @current_field_hash.values.join.to_i,
+    rotation_field(90, @current_field_hash).values.join.to_i,
+    rotation_field(180, @current_field_hash).values.join.to_i,
+    rotation_field(270, @current_field_hash).values.join.to_i,
+    inverse_field_hash.values.join.to_i,
+    rotation_field(90, inverse_field_hash).values.join.to_i,
+    rotation_field(180, inverse_field_hash).values.join.to_i,
+    rotation_field(270, inverse_field_hash).values.join.to_i,
+  ].min
 end
 
 puts "Start at: #{Time.now}"
