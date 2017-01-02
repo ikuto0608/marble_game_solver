@@ -97,94 +97,94 @@ def complete_game?
   end
 end
 
-def jump_right(spot)
-  @current_field_hash[[spot[0], spot[1]]] = EMPTY
-  @current_field_hash[[spot[0] + 1, spot[1]]] = EMPTY
-  @current_field_hash[[spot[0] + 2, spot[1]]] = FILLED
+def jump_right(coordinate)
+  @current_field_hash[[coordinate[0], coordinate[1]]] = EMPTY
+  @current_field_hash[[coordinate[0] + 1, coordinate[1]]] = EMPTY
+  @current_field_hash[[coordinate[0] + 2, coordinate[1]]] = FILLED
 
-  @record.push("Jump RIGHT at (#{spot[0]}, #{spot[1]})!")
+  @record.push("Jump RIGHT at (#{coordinate[0]}, #{coordinate[1]})!")
 end
 
-def jump_left(spot)
-  @current_field_hash[[spot[0], spot[1]]] = EMPTY
-  @current_field_hash[[spot[0] - 1, spot[1]]] = EMPTY
-  @current_field_hash[[spot[0] - 2, spot[1]]] = FILLED
+def jump_left(coordinate)
+  @current_field_hash[[coordinate[0], coordinate[1]]] = EMPTY
+  @current_field_hash[[coordinate[0] - 1, coordinate[1]]] = EMPTY
+  @current_field_hash[[coordinate[0] - 2, coordinate[1]]] = FILLED
 
-  @record.push("Jump LEFT at (#{spot[0]}, #{spot[1]})!")
+  @record.push("Jump LEFT at (#{coordinate[0]}, #{coordinate[1]})!")
 end
 
-def jump_up(spot)
-  @current_field_hash[[spot[0], spot[1]]] = EMPTY
-  @current_field_hash[[spot[0], spot[1] + 1]] = EMPTY
-  @current_field_hash[[spot[0], spot[1] + 2]] = FILLED
+def jump_up(coordinate)
+  @current_field_hash[[coordinate[0], coordinate[1]]] = EMPTY
+  @current_field_hash[[coordinate[0], coordinate[1] + 1]] = EMPTY
+  @current_field_hash[[coordinate[0], coordinate[1] + 2]] = FILLED
 
-  @record.push("Jump UP at (#{spot[0]}, #{spot[1]})!")
+  @record.push("Jump UP at (#{coordinate[0]}, #{coordinate[1]})!")
 end
 
-def jump_down(spot)
-  @current_field_hash[[spot[0], spot[1]]] = EMPTY
-  @current_field_hash[[spot[0], spot[1] - 1]] = EMPTY
-  @current_field_hash[[spot[0], spot[1] - 2]] = FILLED
+def jump_down(coordinate)
+  @current_field_hash[[coordinate[0], coordinate[1]]] = EMPTY
+  @current_field_hash[[coordinate[0], coordinate[1] - 1]] = EMPTY
+  @current_field_hash[[coordinate[0], coordinate[1] - 2]] = FILLED
 
-  @record.push("Jump DOWN at (#{spot[0]}, #{spot[1]})!")
+  @record.push("Jump DOWN at (#{coordinate[0]}, #{coordinate[1]})!")
 end
 
-def can_jump_right?(spot)
-  return false if !filled_place?(spot)
+def can_jump_right?(coordinate)
+  return false if !filled_place?(coordinate)
 
-  next_spot = [spot[0] + 1, spot[1]]
-  return false if !filled_place?(next_spot)
+  next_coordinate = [coordinate[0] + 1, coordinate[1]]
+  return false if !filled_place?(next_coordinate)
 
-  next_next_spot = [spot[0] + 2, spot[1]]
-  return false if !empty_place?(next_next_spot)
+  next_next_coordinate = [coordinate[0] + 2, coordinate[1]]
+  return false if !empty_place?(next_next_coordinate)
 
   return true
 end
 
-def can_jump_left?(spot)
-  return false if !filled_place?(spot)
+def can_jump_left?(coordinate)
+  return false if !filled_place?(coordinate)
 
-  next_spot = [spot[0] - 1, spot[1]]
-  return false if !filled_place?(next_spot)
+  next_coordinate = [coordinate[0] - 1, coordinate[1]]
+  return false if !filled_place?(next_coordinate)
 
-  next_next_spot = [spot[0] - 2, spot[1]]
-  return false if !empty_place?(next_next_spot)
-
-  return true
-end
-
-def can_jump_up?(spot)
-  return false if !filled_place?(spot)
-
-  next_spot = [spot[0], spot[1] + 1]
-  return false if !filled_place?(next_spot)
-
-  next_next_spot = [spot[0], spot[1] + 2]
-  return false if !empty_place?(next_next_spot)
+  next_next_coordinate = [coordinate[0] - 2, coordinate[1]]
+  return false if !empty_place?(next_next_coordinate)
 
   return true
 end
 
-def can_jump_down?(spot)
-  return false if !filled_place?(spot)
+def can_jump_up?(coordinate)
+  return false if !filled_place?(coordinate)
 
-  next_spot = [spot[0], spot[1] - 1]
-  return false if !filled_place?(next_spot)
+  next_coordinate = [coordinate[0], coordinate[1] + 1]
+  return false if !filled_place?(next_coordinate)
 
-  next_next_spot = [spot[0], spot[1] - 2]
-  return false if !empty_place?(next_next_spot)
+  next_next_coordinate = [coordinate[0], coordinate[1] + 2]
+  return false if !empty_place?(next_next_coordinate)
 
   return true
 end
 
-def filled_place?(spot)
-  !@current_field_hash[[spot[0], spot[1]]].nil? &&
-    @current_field_hash[[spot[0], spot[1]]] == FILLED
+def can_jump_down?(coordinate)
+  return false if !filled_place?(coordinate)
+
+  next_coordinate = [coordinate[0], coordinate[1] - 1]
+  return false if !filled_place?(next_coordinate)
+
+  next_next_coordinate = [coordinate[0], coordinate[1] - 2]
+  return false if !empty_place?(next_next_coordinate)
+
+  return true
 end
 
-def empty_place?(spot)
-  !@current_field_hash[[spot[0], spot[1]]].nil? &&
-    @current_field_hash[[spot[0], spot[1]]] == EMPTY
+def filled_place?(coordinate)
+  !@current_field_hash[[coordinate[0], coordinate[1]]].nil? &&
+    @current_field_hash[[coordinate[0], coordinate[1]]] == FILLED
+end
+
+def empty_place?(coordinate)
+  !@current_field_hash[[coordinate[0], coordinate[1]]].nil? &&
+    @current_field_hash[[coordinate[0], coordinate[1]]] == EMPTY
 end
 
 def rotation_field(degrees, field)
