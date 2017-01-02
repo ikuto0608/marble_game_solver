@@ -37,7 +37,6 @@ def play_game
   redis = Redis.new
   filled_coordinates = @current_field_hash.select{|key, value| value == FILLED }
                                           .keys
-
   filled_coordinates.each do |coordinate|
     field_hash = @current_field_hash.dup
     record = @record.dup
@@ -103,7 +102,7 @@ def jump_right(spot)
   @current_field_hash[[spot[0] + 1, spot[1]]] = EMPTY
   @current_field_hash[[spot[0] + 2, spot[1]]] = FILLED
 
-  @record.push("[#{spot[0]}, #{spot[1]}] jump Right!")
+  @record.push("Jump RIGHT at (#{spot[0]}, #{spot[1]})!")
 end
 
 def jump_left(spot)
@@ -111,7 +110,7 @@ def jump_left(spot)
   @current_field_hash[[spot[0] - 1, spot[1]]] = EMPTY
   @current_field_hash[[spot[0] - 2, spot[1]]] = FILLED
 
-  @record.push("[#{spot[0]}, #{spot[1]}] jump Left!")
+  @record.push("Jump LEFT at (#{spot[0]}, #{spot[1]})!")
 end
 
 def jump_up(spot)
@@ -119,7 +118,7 @@ def jump_up(spot)
   @current_field_hash[[spot[0], spot[1] + 1]] = EMPTY
   @current_field_hash[[spot[0], spot[1] + 2]] = FILLED
 
-  @record.push("[#{spot[0]}, #{spot[1]}] jump Up!")
+  @record.push("Jump UP at (#{spot[0]}, #{spot[1]})!")
 end
 
 def jump_down(spot)
@@ -127,7 +126,7 @@ def jump_down(spot)
   @current_field_hash[[spot[0], spot[1] - 1]] = EMPTY
   @current_field_hash[[spot[0], spot[1] - 2]] = FILLED
 
-  @record.push("[#{spot[0]}, #{spot[1]}] jump Down!")
+  @record.push("Jump DOWN at (#{spot[0]}, #{spot[1]})!")
 end
 
 def can_jump_right?(spot)
@@ -179,11 +178,13 @@ def can_jump_down?(spot)
 end
 
 def filled_place?(spot)
-  return !@current_field_hash[[spot[0], spot[1]]].nil? && @current_field_hash[[spot[0], spot[1]]] == FILLED
+  !@current_field_hash[[spot[0], spot[1]]].nil? &&
+    @current_field_hash[[spot[0], spot[1]]] == FILLED
 end
 
 def empty_place?(spot)
-  return !@current_field_hash[[spot[0], spot[1]]].nil? && @current_field_hash[[spot[0], spot[1]]] == EMPTY
+  !@current_field_hash[[spot[0], spot[1]]].nil? &&
+    @current_field_hash[[spot[0], spot[1]]] == EMPTY
 end
 
 def rotation_field(degrees, field)
@@ -223,12 +224,11 @@ def summarize_board_history_key
   ].min
 end
 
+
 puts "Start at: #{Time.now}"
 initialize_field
 play_game
-
-@record.each do |r|
-  puts r
-end
-
 puts "Finish at: #{Time.now}"
+@record.each_with_index do |r, index|
+  puts "#{index + 1},#{r}"
+end
