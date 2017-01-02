@@ -17,7 +17,7 @@ NON_FIELD_ARRAY = [
 @record = []
 
 def initialize_field
-  7.times do |y_index|
+  6.downto(0) do |y_index|
     7.times do |x_index|
       unless NON_FIELD_ARRAY.include?([x_index - 3, y_index - 3])
         unless CENTER == [x_index - 3, y_index - 3]
@@ -120,16 +120,16 @@ end
 
 def jump_up(spot)
   @current_field[[spot[0], spot[1]]] = EMPTY
-  @current_field[[spot[0], spot[1] - 1]] = EMPTY
-  @current_field[[spot[0], spot[1] - 2]] = FILLED
+  @current_field[[spot[0], spot[1] + 1]] = EMPTY
+  @current_field[[spot[0], spot[1] + 2]] = FILLED
 
   @record.push("[#{spot[0]}, #{spot[1]}] jump Up!")
 end
 
 def jump_down(spot)
   @current_field[[spot[0], spot[1]]] = EMPTY
-  @current_field[[spot[0], spot[1] + 1]] = EMPTY
-  @current_field[[spot[0], spot[1] + 2]] = FILLED
+  @current_field[[spot[0], spot[1] - 1]] = EMPTY
+  @current_field[[spot[0], spot[1] - 2]] = FILLED
 
   @record.push("[#{spot[0]}, #{spot[1]}] jump Down!")
 end
@@ -161,10 +161,10 @@ end
 def can_jump_up?(spot)
   return false if !filled_place?(spot)
 
-  next_spot = [spot[0], spot[1] - 1]
+  next_spot = [spot[0], spot[1] + 1]
   return false if !filled_place?(next_spot)
 
-  next_next_spot = [spot[0], spot[1] - 2]
+  next_next_spot = [spot[0], spot[1] + 2]
   return false if !empty_place?(next_next_spot)
 
   return true
@@ -173,10 +173,10 @@ end
 def can_jump_down?(spot)
   return false if !filled_place?(spot)
 
-  next_spot = [spot[0], spot[1] + 1]
+  next_spot = [spot[0], spot[1] - 1]
   return false if !filled_place?(next_spot)
 
-  next_next_spot = [spot[0], spot[1] + 2]
+  next_next_spot = [spot[0], spot[1] - 2]
   return false if !empty_place?(next_next_spot)
 
   return true
