@@ -5,12 +5,12 @@ require 'redis'
 EMPTY = 0
 FILLED = 1
 NON_FIELD = 9
-CENTER = [3, 3]
+CENTER = [0, 0]
 NON_FIELD_ARRAY = [
-                    [0, 0], [1, 0], [0, 1], [1, 1],
-                    [5, 0], [6, 0], [5, 1], [6, 1],
-                    [0, 5], [1, 5], [0, 6], [1, 6],
-                    [5, 5], [6, 5], [5, 6], [6, 6]
+                    [-3, -3], [-2, -3], [-3, -2], [-2, -2],
+                    [2, -3], [3, -3], [2, -2], [3, -2],
+                    [-3, 2], [-2, 2], [-3, 3], [-2, 3],
+                    [2, 2], [3, 2], [2, 3], [3, 3]
                   ]
 
 @current_field = {}
@@ -19,14 +19,14 @@ NON_FIELD_ARRAY = [
 def initialize_field
   7.times do |y_index|
     7.times do |x_index|
-      unless NON_FIELD_ARRAY.include?([x_index, y_index])
-        unless CENTER == [x_index, y_index]
-          @current_field[[x_index, y_index]] = FILLED
+      unless NON_FIELD_ARRAY.include?([x_index - 3, y_index - 3])
+        unless CENTER == [x_index - 3, y_index - 3]
+          @current_field[[x_index - 3, y_index - 3]] = FILLED
         else
-          @current_field[[x_index, y_index]] = EMPTY
+          @current_field[[x_index - 3, y_index - 3]] = EMPTY
         end
       else
-        @current_field[[x_index, y_index]] = NON_FIELD
+        @current_field[[x_index - 3, y_index - 3]] = NON_FIELD
       end
     end
   end
@@ -39,12 +39,23 @@ def play_game
 
   keys.each do |key|
     board_history = []
-    row_board_history = redis.get(@current_field.values.join.to_s)
+    inverse_field_hash = inverse_field
+    board_history_key = [
+                          @current_field.values.join.to_i,
+                          rotation_field(90, @current_field).values.join.to_i,
+                          rotation_field(180, @current_field).values.join.to_i,
+                          rotation_field(270, @current_field).values.join.to_i,
+                          inverse_field_hash.values.join.to_i,
+                          rotation_field(90, inverse_field_hash).values.join.to_i,
+                          rotation_field(180, inverse_field_hash).values.join.to_i,
+                          rotation_field(270, inverse_field_hash).values.join.to_i,
+                        ].min
+    row_board_history = redis.get(board_history_key)
     unless row_board_history.nil?
       board_history = JSON.parse(row_board_history)
     end
 
-    break if board_history.include?(key)
+    next if board_history.include?(key)
     break if complete_game?
 
     field_array = @current_field.dup
@@ -83,7 +94,7 @@ def play_game
     end
 
     board_history << key
-    redis.set(@current_field.values.join.to_s, board_history.to_json)
+    redis.set(board_history_key, board_history.to_json)
   end
 end
 
@@ -179,6 +190,28 @@ def empty_place?(spot)
   return !@current_field[[spot[0], spot[1]]].nil? && @current_field[[spot[0], spot[1]]] == EMPTY
 end
 
+def rotation_field(degrees, field)
+  radians = degrees * Math::PI / 180
+
+  field.keys.inject({}) do |h, key|
+    coordinate = [
+                    (key[0] * Math.cos(radians)) - (key[1] * Math.sin(radians)),
+                    (key[0] * Math.sin(radians)) + (key[1] * Math.cos(radians))
+                  ]
+    h[coordinate] = field[key]
+    h
+  end
+end
+
+def inverse_field
+  inverse_values = @current_field.values.reverse
+  index = 0
+  @current_field.keys.inject({}) do |h, value|
+    h[value] = inverse_values[index]
+    index += 1
+    h
+  end
+end
 
 puts "Start at: #{Time.now}"
 initialize_field
