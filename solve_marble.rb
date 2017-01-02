@@ -35,55 +35,54 @@ end
 
 def play_game
   redis = Redis.new
-  keys = @current_field_hash.select{|key, value| value == FILLED }
-                       .keys
+  filled_coordinates = @current_field_hash.select{|key, value| value == FILLED }
+                                          .keys
 
-  keys.each do |key|
+  filled_coordinates.each do |coordinate|
+    field_hash = @current_field_hash.dup
+    record = @record.dup
+
     board_history_key = summarize_board_history_key
     board_history = redis.get(board_history_key) || []
     if !board_history.empty?
       board_history = JSON.parse(board_history)
+      next if board_history.include?(coordinate)
     end
 
-    next if board_history.include?(key)
-    break if complete_game?
-
-    field_hash = @current_field_hash.dup
-    record = @record.dup
-
-    if can_jump_right?([key[0], key[1]])
-      jump_right([key[0], key[1]])
+    if can_jump_right?([coordinate[0], coordinate[1]])
+      jump_right([coordinate[0], coordinate[1]])
       play_game
+      break if complete_game?
     end
 
-    break if complete_game?
     @current_field_hash = field_hash.dup
     @record = record.dup
 
-    if can_jump_down?([key[0], key[1]])
-      jump_down([key[0], key[1]])
+    if can_jump_down?([coordinate[0], coordinate[1]])
+      jump_down([coordinate[0], coordinate[1]])
       play_game
+      break if complete_game?
     end
 
-    break if complete_game?
     @current_field_hash = field_hash.dup
     @record = record.dup
 
-    if can_jump_left?([key[0], key[1]])
-      jump_left([key[0], key[1]])
+    if can_jump_left?([coordinate[0], coordinate[1]])
+      jump_left([coordinate[0], coordinate[1]])
       play_game
+      break if complete_game?
     end
 
-    break if complete_game?
     @current_field_hash = field_hash.dup
     @record = record.dup
 
-    if can_jump_up?([key[0], key[1]])
-      jump_up([key[0], key[1]])
+    if can_jump_up?([coordinate[0], coordinate[1]])
+      jump_up([coordinate[0], coordinate[1]])
       play_game
+      break if complete_game?
     end
 
-    board_history << key
+    board_history << coordinate
     redis.set(board_history_key, board_history.to_json)
   end
 end
