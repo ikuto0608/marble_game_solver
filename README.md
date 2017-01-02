@@ -7,3 +7,5 @@
 ![alt tag](https://github.com/ikuto0608/marble_game_solver/blob/master/images/sample2.jpg)
 ![alt tag](https://github.com/ikuto0608/marble_game_solver/blob/master/images/sample3.jpg)
 #### Then when you get only one marble, you'll complete the game.
+
+*It takes about 2 min to execute the program.
