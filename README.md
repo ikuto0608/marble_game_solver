@@ -9,3 +9,6 @@
 #### Then when you get only one marble, you'll complete the game.
 
 *It takes about 2 min to execute the program.
+
+
+##### [More detail](https://ikuto0608.github.io/ruby/marble/solver/2017/01/06/marble-solitaire-solver/)
